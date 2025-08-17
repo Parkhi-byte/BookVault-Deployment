@@ -3,6 +3,7 @@ import Cards from "./Cards";
 import axios from "axios";
 import { Link, useSearchParams } from "react-router-dom";
 import list from "../../public/list.json";
+import { API_BASE_URL } from "../config.js";
 
 function Course() {
   const [book, setBook] = useState([]);
@@ -15,7 +16,7 @@ function Course() {
     const getBook = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:4000/book");
+        const res = await axios.get(`${API_BASE_URL}/book`);
         console.log("API Data:", res.data);
         
         if (res.data.length > 0) {

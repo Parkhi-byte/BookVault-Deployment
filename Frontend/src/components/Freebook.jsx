@@ -7,6 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 
 import axios from "axios";
+import { API_BASE_URL } from "../config.js";
 
 import Cards from "./Cards";
 function Freebook() {
@@ -17,7 +18,7 @@ function Freebook() {
     const getBook = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:4000/book");
+        const res = await axios.get(`${API_BASE_URL}/book`);
         const data = res.data.filter((data) => data.category === "Free");
         console.log("API Data:", data);
         

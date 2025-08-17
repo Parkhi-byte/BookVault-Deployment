@@ -7,6 +7,7 @@ import Contact from "./components/Contact";
 import About from "./components/About";
 import BookDetail from "./components/BookDetail";
 import AdminDashboard from "./components/AdminDashboard";
+import DebugInfo from "./components/DebugInfo";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./context/AuthProvider";
 
@@ -31,6 +32,7 @@ function App() {
             path="/admin"
             element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />}
           />
+          <Route path="/debug" element={<DebugInfo />} />
         </Routes>
         <Toaster />
       </div>

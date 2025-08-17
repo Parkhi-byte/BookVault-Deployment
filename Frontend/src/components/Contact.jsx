@@ -3,56 +3,36 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
 import Navbar from "./Navbar";
+import { useForm } from "react-hook-form";
+import { API_BASE_URL } from "../config.js";
 
 function Contact() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: ""
-  });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    if (!formData.email.includes("@")) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-
+  const onSubmit = async (data) => {
     setLoading(true);
-    
     try {
-      const response = await axios.post("http://localhost:4000/contact", formData);
+      const formData = {
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/contact`, formData);
       
-      if (response.data.success) {
-        toast.success(response.data.message);
-        setFormData({
-          name: "",
-          email: "",
-          subject: "",
-          message: ""
-        });
-      } else {
-        toast.error(response.data.message || "Failed to send message");
+      if (response.data) {
+        toast.success("Message sent successfully! We'll get back to you soon.");
+        reset();
       }
     } catch (error) {
-      console.error("Contact submission error:", error);
-      toast.error(error.response?.data?.message || "Failed to send message. Please try again.");
+      if (error.response) {
+        toast.error(error.response.data.message || "Failed to send message");
+      } else {
+        toast.error("Network error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -179,7 +159,7 @@ function Contact() {
             {/* Contact Form */}
             <div className="bg-gray-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-lg">
               <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Send us a Message</h2>
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-2">
                     Full Name *
@@ -187,13 +167,13 @@ function Contact() {
                   <input
                     type="text"
                     id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
+                    {...register("name", { required: "Full name is required" })}
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 dark:text-white text-sm"
                     placeholder="Enter your full name"
-                    required
                   />
+                  {errors.name && (
+                    <span className="text-sm text-red-500">{errors.name.message}</span>
+                  )}
                 </div>
 
                 <div>
@@ -203,13 +183,19 @@ function Contact() {
                   <input
                     type="email"
                     id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
+                    {...register("email", { 
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Invalid email address"
+                      }
+                    })}
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 dark:text-white text-sm"
                     placeholder="Enter your email address"
-                    required
                   />
+                  {errors.email && (
+                    <span className="text-sm text-red-500">{errors.email.message}</span>
+                  )}
                 </div>
 
                 <div>
@@ -219,13 +205,13 @@ function Contact() {
                   <input
                     type="text"
                     id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
+                    {...register("subject", { required: "Subject is required" })}
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 dark:text-white text-sm"
                     placeholder="What is this about?"
-                    required
                   />
+                  {errors.subject && (
+                    <span className="text-sm text-red-500">{errors.subject.message}</span>
+                  )}
                 </div>
 
                 <div>
@@ -234,14 +220,14 @@ function Contact() {
                   </label>
                   <textarea
                     id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
+                    {...register("message", { required: "Message is required" })}
                     rows="5"
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 dark:text-white resize-none text-sm"
                     placeholder="Tell us more about your inquiry..."
-                    required
                   ></textarea>
+                  {errors.message && (
+                    <span className="text-sm text-red-500">{errors.message.message}</span>
+                  )}
                 </div>
 
                 <button

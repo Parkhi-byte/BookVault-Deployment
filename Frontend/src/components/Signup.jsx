@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider";
+import { API_BASE_URL } from "../config.js";
 
 function Signup() {
   const location = useLocation();
@@ -26,7 +27,7 @@ function Signup() {
         password: data.password,
       };
 
-      const response = await axios.post("http://localhost:4000/user/signup", userInfo);
+      const response = await axios.post(`${API_BASE_URL}/user/signup`, userInfo);
       
       if (response.data) {
         // Login the user with the new account

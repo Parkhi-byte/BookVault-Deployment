@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Navbar from "./Navbar";
+import { API_BASE_URL } from "../config.js";
 
 function BookDetail() {
   const { id } = useParams();
@@ -16,9 +17,9 @@ function BookDetail() {
       try {
         setLoading(true);
         // Try to fetch from API first
-        const res = await axios.get(`http://localhost:4000/book/${id}`);
+        const res = await axios.get(`${API_BASE_URL}/book/${id}`);
         if (res.data) {
-          setBook(res.data);
+          setBook(res.data.book);
         } else {
           // Fallback to local data
           const localBooks = await import("../../public/list.json");

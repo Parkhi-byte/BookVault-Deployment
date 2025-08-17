@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import list from "../../public/list.json";
+import { API_BASE_URL } from "../config.js";
 
 function SearchBar() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,7 +17,7 @@ function SearchBar() {
     // Load books from API or fallback to local data
     const loadBooks = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/book");
+        const response = await axios.get(`${API_BASE_URL}/book`);
         if (response.data && response.data.length > 0) {
           setAllBooks(response.data);
         } else {
@@ -44,30 +45,27 @@ function SearchBar() {
     };
   }, []);
 
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    
-    if (value.trim() === "") {
+  const handleSearch = async () => {
+    if (searchTerm.trim() === "") {
       setSearchResults([]);
-      setShowResults(false);
       return;
     }
 
-    setIsSearching(true);
-    
-    // Simulate search delay for better UX
-    setTimeout(() => {
-      const filtered = allBooks.filter(book => 
-        book.name.toLowerCase().includes(value.toLowerCase()) ||
-        book.title.toLowerCase().includes(value.toLowerCase()) ||
-        book.author?.toLowerCase().includes(value.toLowerCase()) ||
-        book.genre?.toLowerCase().includes(value.toLowerCase())
+    try {
+      const response = await axios.get(`${API_BASE_URL}/book`);
+      const allBooks = response.data.books;
+      
+      const filteredBooks = allBooks.filter(book =>
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
       
-      setSearchResults(filtered);
-      setShowResults(true);
-      setIsSearching(false);
-    }, 300);
+      setSearchResults(filteredBooks);
+    } catch (error) {
+      console.error("Error searching books:", error);
+      setSearchResults([]);
+    }
   };
 
   const handleBookClick = (book) => {

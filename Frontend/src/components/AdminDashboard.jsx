@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useAuth } from "../context/AuthProvider";
+import { API_BASE_URL } from "../config.js";
 
 function AdminDashboard() {
   const { token, isAdmin } = useAuth();
@@ -31,14 +33,17 @@ function AdminDashboard() {
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get("http://localhost:4000/book/", {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get(`${API_BASE_URL}/book/`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
-      setBooks(response.data);
+      setBooks(response.data.books);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching books:", error);
       setLoading(false);
+      toast.error("Failed to fetch books");
     }
   };
 
@@ -55,15 +60,20 @@ function AdminDashboard() {
     try {
       if (editingBook) {
         // Update existing book
-        await axios.put(`http://localhost:4000/book/${editingBook._id}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.put(`${API_BASE_URL}/book/${editingBook._id}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
         toast.success("Book updated successfully!");
-        setEditingBook(null);
       } else {
         // Create new book
-        await axios.post("http://localhost:4000/book/", formData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.post(`${API_BASE_URL}/book/`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
         toast.success("Book created successfully!");
       }
@@ -99,8 +109,10 @@ function AdminDashboard() {
   const handleDelete = async (bookId) => {
     if (window.confirm("Are you sure you want to delete this book?")) {
       try {
-        await axios.delete(`http://localhost:4000/book/${bookId}`, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.delete(`${API_BASE_URL}/book/${bookId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         });
         toast.success("Book deleted successfully!");
         fetchBooks();
