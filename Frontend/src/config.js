@@ -4,7 +4,7 @@ const config = {
     API_BASE_URL: 'http://localhost:4000',
   },
   production: {
-    API_BASE_URL: 'https://your-backend-name.onrender.com', // Update this with your actual Render backend URL
+    API_BASE_URL: 'https://bookvault-deployment.onrender.com',
   }
 };
 
