@@ -180,11 +180,18 @@ const seedDatabase = async () => {
         
         await User.deleteMany({});
         console.log("Cleared existing users");
-        
-        // Insert sample books
-        const booksResult = await Book.insertMany(sampleBooks);
-        console.log(`Inserted ${booksResult.length} books`);
-        
+
+        // Create admin user (will be used as uploader for seeded books)
+        const adminPlainPassword = "admin123";
+        const adminHashedPassword = await bcryptjs.hash(adminPlainPassword, 10);
+        const adminUser = await User.create({
+            fullname: "Admin User",
+            email: "admin@bookvault.com",
+            password: adminHashedPassword,
+            role: "admin"
+        });
+        console.log("Created admin:", adminUser.email);
+
         // Insert sample users with hashed passwords
         const hashedUsers = await Promise.all(
             sampleUsers.map(async (user) => ({
@@ -192,14 +199,23 @@ const seedDatabase = async () => {
                 password: await bcryptjs.hash(user.password, 10)
             }))
         );
-        
         const usersResult = await User.insertMany(hashedUsers);
         console.log(`Inserted ${usersResult.length} users`);
+
+        // Prepare and insert sample books with required uploadedBy and computed isFree
+        const booksToInsert = sampleBooks.map((book) => ({
+            ...book,
+            isFree: book.price === 0,
+            uploadedBy: adminUser._id
+        }));
+        const booksResult = await Book.insertMany(booksToInsert);
+        console.log(`Inserted ${booksResult.length} books`);
         
         console.log("Database seeded successfully!");
         console.log("\nSample user credentials:");
-        console.log("Email: demo@example.com, Password: demo123");
-        console.log("Email: test@example.com, Password: test123");
+        console.log("Admin → Email: admin@bookvault.com, Password: admin123");
+        console.log("User → Email: demo@example.com, Password: demo123");
+        console.log("User → Email: test@example.com, Password: test123");
         
         process.exit(0);
     } catch (error) {
