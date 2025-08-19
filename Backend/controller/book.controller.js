@@ -10,6 +10,36 @@ export const getBook = async(req, res) => {
     }
 };
 
+// Search books by query string across multiple fields
+export const searchBooks = async (req, res) => {
+    try {
+        const { q = "", limit = 20 } = req.query;
+        const query = q.trim();
+        if (query.length === 0) {
+            const books = await Book.find().limit(Number(limit)).populate('uploadedBy', 'fullname email');
+            return res.status(200).json(books);
+        }
+
+        const regex = new RegExp(query, 'i');
+        const books = await Book.find({
+            $or: [
+                { name: regex },
+                { title: regex },
+                { author: regex },
+                { genre: regex },
+                { category: regex }
+            ]
+        })
+        .limit(Number(limit))
+        .populate('uploadedBy', 'fullname email');
+
+        res.status(200).json(books);
+    } catch (error) {
+        console.log("Error: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 export const getBookById = async(req, res) => {
     try {
         const { id } = req.params;

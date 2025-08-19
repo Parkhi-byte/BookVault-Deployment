@@ -45,39 +45,45 @@ function SearchBar() {
     };
   }, []);
 
-  const handleSearch = async () => {
-    if (searchTerm.trim() === "") {
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    const query = value.trim().toLowerCase();
+    if (query === "") {
       setSearchResults([]);
+      setShowResults(false);
       return;
     }
 
-    try {
-      const response = await axios.get(`${API_BASE_URL}/book`);
-      const allBooks = response.data.books;
-      
-      const filteredBooks = allBooks.filter(book =>
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.category.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredBooks = allBooks.filter((book) => {
+      const name = book.name?.toLowerCase() || "";
+      const title = book.title?.toLowerCase() || "";
+      const author = book.author?.toLowerCase() || "";
+      const category = book.category?.toLowerCase() || "";
+      const genre = book.genre?.toLowerCase() || "";
+      return (
+        name.includes(query) ||
+        title.includes(query) ||
+        author.includes(query) ||
+        category.includes(query) ||
+        genre.includes(query)
       );
-      
-      setSearchResults(filteredBooks);
-    } catch (error) {
-      console.error("Error searching books:", error);
-      setSearchResults([]);
-    }
+    });
+
+    setSearchResults(filteredBooks);
+    setShowResults(true);
   };
 
   const handleBookClick = (book) => {
     setSearchTerm("");
     setShowResults(false);
-    navigate(`/book/${book.id}`);
+    navigate(`/book/${book._id || book.id}`);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (searchResults.length > 0) {
-      handleBookClick(searchResults[0]);
+    if (searchTerm.trim()) {
+      setShowResults(false);
+      navigate(`/courses?search=${encodeURIComponent(searchTerm.trim())}`);
     }
   };
 
@@ -89,6 +95,9 @@ function SearchBar() {
             type="text"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
+            onFocus={() => {
+              if (searchTerm.trim()) setShowResults(true);
+            }}
             className="grow outline-none rounded-md px-1 bg-white dark:bg-gray-800 dark:text-white text-sm sm:text-base placeholder-gray-500 dark:placeholder-gray-400"
             placeholder="Search books, authors, genres..."
           />
@@ -112,13 +121,13 @@ function SearchBar() {
       </form>
 
       {/* Search Results Dropdown */}
-      {showResults && (
+      {showResults && searchTerm.trim() && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-80 sm:max-h-96 overflow-y-auto">
           {searchResults.length > 0 ? (
             <div className="py-2">
               {searchResults.slice(0, 6).map((book) => (
                 <div
-                  key={book.id}
+                  key={book._id || book.id}
                   onClick={() => handleBookClick(book)}
                   className="px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200"
                 >

@@ -19,7 +19,8 @@ function BookDetail() {
         // Try to fetch from API first
         const res = await axios.get(`${API_BASE_URL}/book/${id}`);
         if (res.data) {
-          setBook(res.data.book);
+          // Backend returns a book document directly
+          setBook(res.data.book || res.data);
         } else {
           // Fallback to local data
           const localBooks = await import("../../public/list.json");
