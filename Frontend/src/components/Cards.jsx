@@ -46,18 +46,22 @@ function Cards({ item }) {
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
               loading="lazy"
             />
-            {/* Category Badge Overlay */}
-            <div className="absolute top-2 right-2">
-              <div className={`badge ${category === "Free" ? "badge-success" : "badge-warning"} text-xs`}>
-                {category}
+            {/* Category Badge Overlay - Only show for free books */}
+            {bookIsFree && (
+              <div className="absolute top-2 right-2">
+                <div className="badge badge-success text-xs">
+                  {category}
+                </div>
               </div>
-            </div>
-            {/* Free/Paid Badge Overlay */}
-            <div className="absolute top-2 left-2">
-              <div className={`badge ${bookIsFree ? "badge-success" : "badge-warning"} text-xs`}>
-                {bookIsFree ? "Free" : "Paid"}
+            )}
+            {/* Free/Paid Badge Overlay - Only show for paid books */}
+            {!bookIsFree && (
+              <div className="absolute top-2 right-2">
+                <div className="badge badge-warning text-xs">
+                  Paid
+                </div>
               </div>
-            </div>
+            )}
           </figure>
           
           {/* Card Content */}
