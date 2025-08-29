@@ -27,9 +27,11 @@ function Cards({ item }) {
     uploadedBy = null
   } = item;
 
-  // Determine if book is free based on isFree field or price
-  const bookIsFree = isFree !== undefined ? isFree : price === 0;
+  // Determine if book is free based on isFree field, price, or category
+  const bookIsFree = isFree !== undefined ? isFree : (price === 0 || category === "Free");
   const displayPrice = bookIsFree ? 0 : price;
+  
+
 
   return (
     <div className="w-full">
